@@ -66,9 +66,11 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
             {
                 StopBoosting();
             }
+
+            rigidbody.velocity = new Vector2(horizontal * moveSpeed, rigidbody.velocity.y);
+            
         }
 
-        rigidbody.velocity = new Vector2(horizontal * moveSpeed, rigidbody.velocity.y);
         if (isBoosting)
         {
             rigidbody.AddForce(Vector2.up * boostForce * Time.fixedDeltaTime, ForceMode2D.Impulse);
@@ -78,6 +80,12 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     private void StartBoosting()
     {
         isBoosting = true;
+        photonView.RPC("RPC_StartBoosting", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_StartBoosting()
+    {
         var emission = jumpParticles.emission;
         emission.rateOverTimeMultiplier = jumpParticlesToEmit;
     }
@@ -85,6 +93,12 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     private void StopBoosting()
     {
         isBoosting = false;
+        photonView.RPC("RPC_StopBoosting", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_StopBoosting()
+    {
         var emission = jumpParticles.emission;
         emission.rateOverTimeMultiplier = 0;
     }
