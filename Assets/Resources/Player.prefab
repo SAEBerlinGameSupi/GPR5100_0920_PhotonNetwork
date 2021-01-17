@@ -240,7 +240,6 @@ MonoBehaviour:
   boostForce: 15
   groundedCheckSize: {x: 1.1, y: 1.1}
   jumpParticlesToEmit: 200
-  stunDuration: 0.5
 --- !u!212 &339856997260114391
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -311,7 +310,7 @@ Rigidbody2D:
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!61 &339856997260114393
 BoxCollider2D:
