@@ -11,7 +11,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     [SerializeField] ParticleSystem jumpParticles;
 
     [SerializeField] UnityEngine.UI.Text nicknameText;
-    [SerializeField] float moveSpeed, jumpVelocity, boostForce;
+    [SerializeField] float moveSpeed, jumpVelocity, boostForce, slamForce;
     [SerializeField] Vector2 groundedCheckSize;
     [SerializeField] int jumpParticlesToEmit;
 
@@ -62,9 +62,17 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
             {
                 StartBoosting();
             }
-            else if (vertical <= 0 && oldVertical > 0)
+            //falling
+            if (vertical == 0 && oldVertical > 0)
             {
                 StopBoosting();
+            }
+            //smashing
+            else if (vertical < 0)
+            {
+                StopBoosting();
+                //move downwards
+                rigidbody.AddForce(Vector2.up * -slamForce);
             }
 
             rigidbody.velocity = new Vector2(horizontal * moveSpeed, rigidbody.velocity.y);

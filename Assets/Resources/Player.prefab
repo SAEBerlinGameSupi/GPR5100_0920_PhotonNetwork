@@ -238,6 +238,7 @@ MonoBehaviour:
   moveSpeed: 5
   jumpVelocity: 7
   boostForce: 15
+  slamForce: 50
   groundedCheckSize: {x: 1.1, y: 1.1}
   jumpParticlesToEmit: 200
 --- !u!212 &339856997260114391
