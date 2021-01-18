@@ -9,9 +9,10 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     [SerializeField] new Rigidbody2D rigidbody;
     [SerializeField] TrailRenderer trailRenderer;
     [SerializeField] ParticleSystem jumpParticles;
+    [SerializeField] ParticleSystem slamParticles;
 
     [SerializeField] UnityEngine.UI.Text nicknameText;
-    [SerializeField] float moveSpeed, jumpVelocity, boostForce;
+    [SerializeField] float moveSpeed, jumpVelocity, boostForce, slamForce;
     [SerializeField] Vector2 groundedCheckSize;
     [SerializeField] int jumpParticlesToEmit;
 
@@ -19,6 +20,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     private float horizontal;
     private float vertical;
     bool isBoosting;
+    bool isSlamming;
 
     private void Start()
     {
@@ -52,8 +54,9 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
             var oldVertical = vertical;
             horizontal = Input.GetAxis("Horizontal");
             vertical = Input.GetAxis("Vertical");
+            bool isGrounded = IsGrounded();
 
-            if (IsGrounded() && vertical > 0)
+            if (isGrounded && vertical > 0)
             {
                 Jump();
             }
@@ -67,40 +70,84 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
                 StopBoosting();
             }
 
+            if (vertical < 0 && oldVertical >= 0 && !isGrounded)
+            {
+                StartSlamming();
+            }
+            else if ((vertical >= 0 && oldVertical < 0) || isGrounded)
+            {
+                StopSlamming();
+            }
+
+
             rigidbody.velocity = new Vector2(horizontal * moveSpeed, rigidbody.velocity.y);
-            
+
         }
 
         if (isBoosting)
         {
             rigidbody.AddForce(Vector2.up * boostForce * Time.fixedDeltaTime, ForceMode2D.Impulse);
         }
+
+        if (isSlamming)
+        {
+            rigidbody.AddForce(Vector2.down * slamForce * Time.fixedDeltaTime, ForceMode2D.Impulse);
+        }
+
+
+
     }
 
     private void StartBoosting()
     {
-        isBoosting = true;
         photonView.RPC("RPC_StartBoosting", RpcTarget.All);
     }
 
     [PunRPC]
     private void RPC_StartBoosting()
     {
+        isBoosting = true;
         var emission = jumpParticles.emission;
         emission.rateOverTimeMultiplier = jumpParticlesToEmit;
     }
 
     private void StopBoosting()
     {
-        isBoosting = false;
+       
         photonView.RPC("RPC_StopBoosting", RpcTarget.All);
     }
 
     [PunRPC]
     private void RPC_StopBoosting()
     {
+        isBoosting = false;
         var emission = jumpParticles.emission;
         emission.rateOverTimeMultiplier = 0;
+    }
+
+
+    private void StartSlamming()
+    {
+        isSlamming = true;
+        photonView.RPC("RPC_StartSlamming", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_StartSlamming()
+    {
+        slamParticles.Play();
+    }
+
+    private void StopSlamming()
+    {
+        isSlamming = false;
+        photonView.RPC("RPC_StopSlamming", RpcTarget.All);
+    }
+
+    [PunRPC]
+    private void RPC_StopSlamming()
+    {
+        slamParticles.Stop();
     }
 
     private void Jump()
@@ -133,13 +180,11 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         {
             stream.SendNext(horizontal);
             stream.SendNext(vertical);
-            stream.SendNext(isBoosting);
         }
         else
         {
             horizontal = (float)stream.ReceiveNext();
             vertical = (float)stream.ReceiveNext();
-            isBoosting = (bool)stream.ReceiveNext();
         }
     }
 }
