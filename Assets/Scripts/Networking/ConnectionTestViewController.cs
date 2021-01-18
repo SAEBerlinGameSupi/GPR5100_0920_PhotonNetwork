@@ -3,15 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 
 public class ConnectionTestViewController : MonoBehaviour
 {
-    [SerializeField] ConnectionModel connectionmodel;
+    [SerializeField] ConnectionModel connectionModel;
 
-    private string _nickName = "Flo";
+    private string nickname = "NewPlayer";
+    private string lastError;
+
+    private void Start()
+    {
+        connectionModel.ConnectionError += OnError;
+    }
+
+    private void OnDestroy()
+    {
+        if (connectionModel != null)
+            connectionModel.ConnectionError -= OnError;
+    }
+
+    private void OnError(string obj)
+    {
+        lastError = obj;
+    }
 
     private void OnGUI()
     {
+        GUI.color = Color.white;
         GUILayout.Label("State: " + PhotonNetwork.NetworkClientState);
 
         switch (PhotonNetwork.NetworkClientState)
@@ -19,17 +38,47 @@ public class ConnectionTestViewController : MonoBehaviour
             case ClientState.PeerCreated:
                 if (GUILayout.Button("Connect"))
                 {
-
-                    connectionmodel.ConnectToServer();
+                    connectionModel.ConnectToServer();
                 }
                 break;
 
             case ClientState.ConnectedToMasterServer:
-                if (GUILayout.Button("Create Random"))
+                if (GUILayout.Button("Join Lobby"))
                 {
-                    connectionmodel.CreateRoom("Test123");
+                    connectionModel.JoinDefaultLobby();
                 }
                 break;
+
+            case ClientState.JoinedLobby:
+                GUILayout.Label("Lobby: " + PhotonNetwork.CurrentLobby.Name);
+
+                if (GUILayout.Button("Create Random"))
+                {
+                    connectionModel.CreateRandom();
+                }
+                if (GUILayout.Button("Join Random Random"))
+                {
+                    connectionModel.JoinRandomRoom();
+                }
+
+                foreach (var roomInfo in connectionModel.GetAllRooms())
+                {
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("Room: " + roomInfo.Name + "(" + roomInfo.PlayerCount + "/" + roomInfo.MaxPlayers + ")");
+
+                    if (roomInfo.IsOpen)
+                    {
+                        if (GUILayout.Button("Join"))
+                        {
+                            connectionModel.JoinRoom(roomInfo.Name);
+                        }
+                    }
+
+                    GUILayout.EndHorizontal();
+                }
+
+                break;
+
             case ClientState.Joined:
                 var room = PhotonNetwork.CurrentRoom;
 
@@ -38,16 +87,20 @@ public class ConnectionTestViewController : MonoBehaviour
                 GUILayout.Label("-----");
                 foreach (var pair in room.Players)
                 {
-                    GUILayout.Label(pair.Key + ": " + pair.Value.NickName + (pair.Value.IsMasterClient ? "(Masterclient)" : ""));
+                    GUILayout.Label(pair.Key + ": " + pair.Value.NickName + (pair.Value.IsMasterClient ? "(MasterClient)" : ""));
                 }
                 GUILayout.Label("-----");
 
-                GUILayout.Label("LocalPlayer");
-                GUILayout.Label("Name");
-                _nickName = GUILayout.TextField(_nickName);
-                connectionmodel.RenameLocalPlayerTo(_nickName);
+                GUILayout.Label("LocalPlayer:");
+                GUILayout.Label("Name:");
+                nickname = GUILayout.TextField(nickname);
 
+                connectionModel.RenameLocalPlayerTo(nickname);
                 break;
         }
+
+        GUI.color = Color.red;
+        GUILayout.Label("LastError: " + lastError);
     }
+
 }
