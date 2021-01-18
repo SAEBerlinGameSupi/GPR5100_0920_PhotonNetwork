@@ -234,6 +234,7 @@ MonoBehaviour:
   rigidbody: {fileID: 339856997260114394}
   trailRenderer: {fileID: 6416270284110222910}
   jumpParticles: {fileID: 369610101574355133}
+  slamParticles: {fileID: 8020721348031106972}
   nicknameText: {fileID: 339856995667128444}
   moveSpeed: 5
   jumpVelocity: 7
@@ -241,6 +242,7 @@ MonoBehaviour:
   slamForce: 50
   groundedCheckSize: {x: 1.1, y: 1.1}
   jumpParticlesToEmit: 200
+  slamParticlesToEmit: 200
 --- !u!212 &339856997260114391
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -5239,7 +5241,7 @@ ParticleSystem:
   ringBufferLoopRange: {x: 0, y: 1}
   looping: 1
   prewarm: 0
-  playOnAwake: 0
+  playOnAwake: 1
   useUnscaledTime: 0
   autoRandomSeed: 1
   useRigidbodyForVelocity: 0
@@ -5413,7 +5415,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 1, g: 0, b: 0.85276556, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -7373,7 +7375,7 @@ ParticleSystem:
         m_RotationOrder: 4
     m_Range: {x: 0, y: 1}
   ForceModule:
-    enabled: 1
+    enabled: 0
     x:
       serializedVersion: 2
       minMaxState: 0
