@@ -1,18 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class NewBehaviourScript : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
+
+public class ConnectionModel : MonoBehaviour
+{   
+    public void ConnectToServer()
     {
-        
+        PhotonNetwork.ConnectUsingSettings();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void CreateRoom(string name)
     {
-        
+        PhotonNetwork.CreateRoom(name);
+    }
+
+    internal void JoinRandomRoom()
+    {
+        PhotonNetwork.JoinRandomRoom();
+    }
+
+    public void RenameLocalPlayerTo(string newName){
+        PhotonNetwork.LocalPlayer.NickName = newName;
     }
 }
