@@ -11,6 +11,11 @@ public class ConnectionModel : MonoBehaviourPunCallbacks
 
     public event System.Action<string> ConnectionError;
 
+    private void Start()
+    {
+        PhotonNetwork.AutomaticallySyncScene = true;
+    }
+
     public void ConnectToServer()
     {
         PhotonNetwork.ConnectUsingSettings();
@@ -66,4 +71,11 @@ public class ConnectionModel : MonoBehaviourPunCallbacks
         ConnectionError?.Invoke("Join Room Failed: " + message);
     }
 
+    internal void StartGame()
+    {
+        if(PhotonNetwork.IsConnectedAndReady && PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.LoadLevel(1);
+        }
+    }
 }

@@ -94,8 +94,16 @@ public class ConnectionTestViewController : MonoBehaviour
                 GUILayout.Label("LocalPlayer:");
                 GUILayout.Label("Name:");
                 nickname = GUILayout.TextField(nickname);
-
                 connectionModel.RenameLocalPlayerTo(nickname);
+
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    if (GUILayout.Button("Play!"))
+                    {
+                        connectionModel.StartGame();
+                    }
+                }
+                
                 break;
         }
 
