@@ -55,33 +55,35 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
             var oldVertical = vertical;
             horizontal = Input.GetAxis("Horizontal");
             vertical = Input.GetAxis("Vertical");
+            bool isGrounded = IsGrounded();
 
-            if (vertical >= 0)
+            if (IsGrounded() && vertical > 0)
             {
-                if (IsGrounded() && vertical > 0)
-                {
-                    Jump();
-                }
-
-                if (oldVertical <= 0 && vertical > 0)
-                {
-                    StartBoosting();
-                }
-                //falling
-                if (vertical == 0 && oldVertical > 0)
-                {
-                    StopBoosting();
-                }
-                StopSlamming();
+                Jump();
             }
-            //smashing
-            else if (vertical < 0)
+
+            if (oldVertical <= 0 && vertical > 0)
+            {
+                StartBoosting();
+            }
+            if (vertical <= 0 && oldVertical > 0)
             {
                 StopBoosting();
-                StartSlamming();
-                //move downwards
+            }
+            if ((vertical >= 0 && oldVertical < 0) || isGrounded)
+            {
+                StopSlamming();
+            }
+            else if (vertical < 0)
+            {
+                if (oldVertical >= 0)
+                {
+                    StopBoosting();
+                    StartSlamming();
+                }
                 rigidbody.AddForce(Vector2.up * -slamForce);
             }
+
 
             rigidbody.velocity = new Vector2(horizontal * moveSpeed, rigidbody.velocity.y);
 
@@ -121,7 +123,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     private void StartSlamming()
     {
-        //isSlamming = true;
+        isSlamming = true;
         photonView.RPC("RPC_StartSlamming", RpcTarget.All);
     }
 
@@ -134,12 +136,12 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     private void StopSlamming()
     {
-        //isSlamming = false;
+        isSlamming = false;
         photonView.RPC("RPC_StopSlamming", RpcTarget.All);
     }
 
     [PunRPC]
-    private void RPC_Stoplamming()
+    private void RPC_StopSlamming()
     {
         var emission = slamParticles.emission;
         emission.rateOverTimeMultiplier = 0;
