@@ -13,9 +13,8 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     [SerializeField] UnityEngine.UI.Text nicknameText;
     [SerializeField] float moveSpeed, jumpVelocity, boostForce, slamForce;
-    [SerializeField] Vector2 groundedCheckSize;
+    [SerializeField] Vector2 groundedCheckSize, groundedCheckOffset;
     [SerializeField] int jumpParticlesToEmit;
-
 
     private float horizontal;
     private float vertical;
@@ -113,7 +112,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     private void StopBoosting()
     {
-       
+
         photonView.RPC("RPC_StopBoosting", RpcTarget.All);
     }
 
@@ -157,7 +156,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     private bool IsGrounded()
     {
-        var hits = Physics2D.BoxCastAll(transform.position, groundedCheckSize, 0, Vector2.zero, 0);
+        var hits = Physics2D.BoxCastAll(transform.position + (Vector3)groundedCheckOffset, groundedCheckSize, 0, Vector2.zero, 0);
 
         foreach (var hit in hits)
         {
@@ -171,7 +170,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireCube(transform.position, groundedCheckSize);
+        Gizmos.DrawWireCube(transform.position + (Vector3)groundedCheckOffset, groundedCheckSize);
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
