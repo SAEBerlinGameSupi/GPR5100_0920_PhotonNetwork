@@ -11,6 +11,8 @@ public class VictoryHandler : MonoBehaviourPun
     [SerializeField] Text text;
     [SerializeField] Button resetButton;
 
+    bool isFinished;
+
     private void Start()
     {
         resetButton.gameObject.SetActive(false);
@@ -19,7 +21,7 @@ public class VictoryHandler : MonoBehaviourPun
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (PhotonNetwork.IsMasterClient)
+        if (PhotonNetwork.IsMasterClient && !isFinished)
         {
             if (collision.gameObject.TryGetComponent(out PlayerController pc))
             {
@@ -41,6 +43,7 @@ public class VictoryHandler : MonoBehaviourPun
         text.gameObject.SetActive(true);
         text.color = PlayerController.GetColorForPlayerById(winnerNr);
         text.text = p.NickName + " won the Game!";
+        isFinished = true;
 
         if (PhotonNetwork.IsMasterClient)
         {
@@ -60,8 +63,11 @@ public class VictoryHandler : MonoBehaviourPun
     private void RPC_Reset()
     {
         Debug.Log("Resetting");
-
         PlayerController myPlayer = GameObject.FindObjectsOfType<PlayerController>().First((x) => x.photonView.IsMine);
+
+        isFinished = false;
         myPlayer.transform.position = Vector3.zero;
+        resetButton.gameObject.SetActive(false);
+        text.gameObject.SetActive(false);
     }
 }
