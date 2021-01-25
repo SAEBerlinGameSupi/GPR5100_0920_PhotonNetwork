@@ -23,7 +23,7 @@ public class ConnectionModel : MonoBehaviourPunCallbacks
 
     public void CreateRandom()
     {
-        PhotonNetwork.CreateRoom(null);
+        PhotonNetwork.CreateRoom("LucaTest");
     }
 
     internal void JoinRandomRoom()

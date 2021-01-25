@@ -13,10 +13,8 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     [SerializeField] UnityEngine.UI.Text nicknameText;
     [SerializeField] float moveSpeed, jumpVelocity, boostForce, slamForce;
-    [SerializeField] Vector2 groundedCheckSize;
+    [SerializeField] Vector2 groundedCheckSize, groundedCheckOffset;
     [SerializeField] int jumpParticlesToEmit;
-    [SerializeField] int slamParticlesToEmit;
-
 
     private float horizontal;
     private float vertical;
@@ -57,7 +55,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
             vertical = Input.GetAxis("Vertical");
             bool isGrounded = IsGrounded();
 
-            if (IsGrounded() && vertical > 0)
+            if (isGrounded && vertical > 0)
             {
                 Jump();
             }
@@ -66,22 +64,18 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
             {
                 StartBoosting();
             }
-            if (vertical <= 0 && oldVertical > 0)
+            else if (vertical <= 0 && oldVertical > 0)
             {
                 StopBoosting();
             }
-            if ((vertical >= 0 && oldVertical < 0) || isGrounded)
+
+            if (vertical < 0 && oldVertical >= 0 && !isGrounded)
+            {
+                StartSlamming();
+            }
+            else if ((vertical >= 0 && oldVertical < 0) || isGrounded)
             {
                 StopSlamming();
-            }
-            else if (vertical < 0)
-            {
-                if (oldVertical >= 0)
-                {
-                    StopBoosting();
-                    StartSlamming();
-                }
-                rigidbody.AddForce(Vector2.up * -slamForce);
             }
 
 
@@ -93,33 +87,43 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         {
             rigidbody.AddForce(Vector2.up * boostForce * Time.fixedDeltaTime, ForceMode2D.Impulse);
         }
+
+        if (isSlamming)
+        {
+            rigidbody.AddForce(Vector2.down * slamForce * Time.fixedDeltaTime, ForceMode2D.Impulse);
+        }
+
+
+
     }
 
     private void StartBoosting()
     {
-        isBoosting = true;
         photonView.RPC("RPC_StartBoosting", RpcTarget.All);
     }
 
     [PunRPC]
     private void RPC_StartBoosting()
     {
+        isBoosting = true;
         var emission = jumpParticles.emission;
         emission.rateOverTimeMultiplier = jumpParticlesToEmit;
     }
 
     private void StopBoosting()
     {
-        isBoosting = false;
+
         photonView.RPC("RPC_StopBoosting", RpcTarget.All);
     }
 
     [PunRPC]
     private void RPC_StopBoosting()
     {
+        isBoosting = false;
         var emission = jumpParticles.emission;
         emission.rateOverTimeMultiplier = 0;
     }
+
 
     private void StartSlamming()
     {
@@ -130,8 +134,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     [PunRPC]
     private void RPC_StartSlamming()
     {
-        var emission = slamParticles.emission;
-        emission.rateOverTimeMultiplier = slamParticlesToEmit;
+        slamParticles.Play();
     }
 
     private void StopSlamming()
@@ -143,8 +146,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     [PunRPC]
     private void RPC_StopSlamming()
     {
-        var emission = slamParticles.emission;
-        emission.rateOverTimeMultiplier = 0;
+        slamParticles.Stop();
     }
 
     private void Jump()
@@ -154,7 +156,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     private bool IsGrounded()
     {
-        var hits = Physics2D.BoxCastAll(transform.position, groundedCheckSize, 0, Vector2.zero, 0);
+        var hits = Physics2D.BoxCastAll(transform.position + (Vector3)groundedCheckOffset, groundedCheckSize, 0, Vector2.zero, 0);
 
         foreach (var hit in hits)
         {
@@ -168,7 +170,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawWireCube(transform.position, groundedCheckSize);
+        Gizmos.DrawWireCube(transform.position + (Vector3)groundedCheckOffset, groundedCheckSize);
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -177,13 +179,11 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         {
             stream.SendNext(horizontal);
             stream.SendNext(vertical);
-            stream.SendNext(isBoosting);
         }
         else
         {
             horizontal = (float)stream.ReceiveNext();
             vertical = (float)stream.ReceiveNext();
-            isBoosting = (bool)stream.ReceiveNext();
         }
     }
 }
