@@ -236,6 +236,7 @@ MonoBehaviour:
   trailRenderer: {fileID: 6416270284110222910}
   jumpParticles: {fileID: 369610101574355133}
   slamParticles: {fileID: 8020721348031106972}
+  cameraObject: {fileID: 4938291490451879324}
   nicknameText: {fileID: 339856995667128444}
   moveSpeed: 5
   jumpVelocity: 7

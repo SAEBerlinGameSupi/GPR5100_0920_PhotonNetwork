@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     [SerializeField] TrailRenderer trailRenderer;
     [SerializeField] ParticleSystem jumpParticles;
     [SerializeField] ParticleSystem slamParticles;
+    [SerializeField] GameObject cameraObject;
 
     [SerializeField] UnityEngine.UI.Text nicknameText;
     [SerializeField] float moveSpeed, jumpVelocity, boostForce, slamForce;
@@ -25,6 +26,11 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     {
         nicknameText.text = photonView.Owner.NickName;
         SetLocalColors();
+
+        if (!photonView.IsMine)
+        {
+            cameraObject.SetActive(false);
+        }
     }
 
     private void SetLocalColors()
