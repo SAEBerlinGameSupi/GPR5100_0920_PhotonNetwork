@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         trailRenderer.endColor = color;
     }
 
-    private Color GetColorForPlayerById(int id)
+    public static Color GetColorForPlayerById(int id)
     {
         return Color.HSVToRGB((float)id / 10f, 1, 1);
     }
