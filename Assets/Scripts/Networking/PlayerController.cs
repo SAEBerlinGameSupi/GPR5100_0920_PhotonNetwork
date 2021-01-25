@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviourPun, IPunObservable
 {
@@ -16,6 +17,8 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     [SerializeField] float moveSpeed, jumpVelocity, boostForce, slamForce;
     [SerializeField] Vector2 groundedCheckSize, groundedCheckOffset;
     [SerializeField] int jumpParticlesToEmit;
+
+    [SerializeField] GameObject VictoryText;
 
     private float horizontal;
     private float vertical;
@@ -190,6 +193,14 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         {
             horizontal = (float)stream.ReceiveNext();
             vertical = (float)stream.ReceiveNext();
+        }
+    }
+
+    public void UpdateVictoryUI()
+    {
+        if (photonView.IsMine)
+        {
+            VictoryText.SetActive(true);
         }
     }
 }
